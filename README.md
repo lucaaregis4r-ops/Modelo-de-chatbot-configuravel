@@ -1,98 +1,61 @@
-# CHATBOT GENÉRICO V1 — PLANO ECONÔMICO PARA GPT-5.6 LUNA
+# Chatbot configurável v1
 
 ## Executar
 
-Requisitos: Node.js 24+ e npm.
+Requer Node.js 24 ou superior e npm.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abra `http://localhost:3000`. Sem chave, selecione `Local (teste)`; para usar IA real, copie `.env.example` para `.env.local` e configure `OPENROUTER_API_KEY` ou `GEMINI_API_KEY`.
+Abra `http://localhost:3000`. Para testar sem credenciais, escolha `Local (teste)`. Para usar um provedor, copie `.env.example` para `.env.local` e configure `OPENROUTER_API_KEY` ou `GEMINI_API_KEY`. Consulte o [guia de configuração dos provedores](GUIA_CONFIGURAR_IA.md).
 
-Consulte o [Guia para configurar provedores de IA](GUIA_CONFIGURAR_IA.md) para instruções detalhadas.
-
-O banco SQLite é criado automaticamente em `data/chatbot.sqlite`. TXT, Markdown, PDF, DOCX, CSV e XLSX podem ser adicionados pela interface. O banco, arquivos locais e segredos não devem ser versionados.
+O app cria o banco SQLite em `data/chatbot.sqlite`. A interface aceita TXT, Markdown, PDF, DOCX, CSV e XLSX. Não versione o banco, os arquivos enviados ou as chaves.
 
 ## Objetivo
-Construir um chatbot configurável em que o usuário escolhe:
-1. instruções do assistente;
-2. base de conhecimento;
-3. provedor/modelo de LLM;
-4. modo de uso (consulta, tutor ou avaliação).
 
-O mesmo núcleo deve servir para RH, esporte, pesquisa, atendimento interno etc.
+O usuário configura as instruções do assistente, a base de conhecimento, o provedor/modelo e o modo de uso: consulta, tutor ou avaliação. O mesmo núcleo pode atender diferentes áreas, como RH, esporte, pesquisa e atendimento interno.
 
-## Arquitetura V1
-- Next.js + TypeScript
-- assistant-ui para a interface de chat
-- API própria do projeto
-- adapters próprios para LLM e embeddings
-- SQLite local para persistência
-- embeddings armazenados como JSON no SQLite
-- similaridade cosseno calculada em TypeScript na V1
-- sem LangChain na V1
-- `.env` para chaves
+## Arquitetura
 
-### Por que assim?
-Poucas dependências, código fácil de rastrear e bom funcionamento em Windows e Linux. Banco vetorial dedicado pode entrar depois, sem alterar os contratos principais.
+- Next.js e TypeScript para a aplicação.
+- `assistant-ui` para a interface de chat.
+- API própria, com adapters para LLM e embeddings.
+- SQLite para persistência; na v1, embeddings ficam em JSON e a similaridade cosseno é calculada em TypeScript.
+- As chaves ficam em `.env`.
 
-## Windows → GitHub → Linux
-O repositório é a fonte central. Em cada máquina:
+A arquitetura mantém poucas dependências e permite trocar o armazenamento vetorial depois sem alterar os contratos principais. A v1 não usa LangChain.
 
-```bash
-git pull
-npm install
-npm run dev
-```
+## Desenvolvimento por etapas
 
-Nunca versionar: `.env`, `node_modules`, banco local real, uploads temporários ou cache de modelos.
+Trabalhe em uma macroetapa por vez. Ao iniciar uma mudança, forneça somente:
 
-Use sempre caminhos com `path.join()`/`process.cwd()`. Nunca grave `C:\\...` ou `/home/...` no código.
-
-## Regra de execução econômica
-Execute **uma macroetapa por vez**. Para cada macro, entregue ao Luna somente:
 - `PROJECT_CONTEXT.md`;
-- o arquivo da macro atual;
-- os arquivos explicitamente citados nela;
-- erros atuais, se existirem.
+- o arquivo da macroetapa atual;
+- os arquivos que ela cita explicitamente;
+- erros atuais, se houver.
 
-Não envie o repositório inteiro no prompt.
+Diretrizes:
 
-## Regras para o Luna
-1. Não implementar a próxima macro.
-2. Não fazer refatoração ampla sem necessidade.
-3. Reutilizar código existente antes de criar abstrações novas.
-4. Alterar o menor número possível de arquivos.
-5. No máximo 1–3 testes focados por macro, quando realmente úteis.
-6. Não criar mocks, camadas ou documentação extensa sem pedido.
-7. Rodar apenas verificações relacionadas à mudança; build completo apenas quando a macro pedir.
-8. Ao concluir, registrar em `PROJECT_CONTEXT.md` somente: feito / arquivos-chave / próximo passo.
-9. Se algo já existir, ajustar em vez de duplicar.
-10. Parar assim que os critérios de aceite forem atendidos.
+1. Não implemente a macroetapa seguinte.
+2. Evite refatorações amplas sem necessidade.
+3. Reaproveite o código existente antes de criar novas abstrações.
+4. Altere apenas os arquivos necessários.
+5. Crie de 1 a 3 testes focados por macroetapa quando forem úteis.
+6. Não adicione mocks, camadas ou documentação sem necessidade.
+7. Rode as verificações relacionadas à mudança; faça o build completo quando a macroetapa pedir.
+8. Ao concluir, registre em `PROJECT_CONTEXT.md` o que foi feito, os arquivos principais e o próximo passo.
+9. Se a funcionalidade já existir, ajuste-a em vez de duplicá-la.
+10. Pare quando os critérios de aceite forem atendidos.
 
-## Ordem
-### Fase A — núcleo
-M00 → M06
+## Ordem das macroetapas
 
-### Fase B — RAG
-M07 → M14
+- Núcleo: M00–M06
+- RAG: M07–M14
+- Comportamento: M15–M20
+- Documentos e produto: M21–M25
 
-### Fase C — comportamento
-M15 → M20
+## Critérios da v1
 
-### Fase D — documentos e produto
-M21 → M25
-
-## Definição de pronto da V1
-A V1 está pronta quando for possível:
-- criar um assistente;
-- escrever instruções;
-- escolher modelo/provedor;
-- enviar documentos;
-- conversar usando RAG;
-- ver fontes usadas;
-- manter histórico;
-- usar consulta/tutor/avaliação;
-- exportar/importar uma configuração básica.
+A versão 1 permite criar um assistente, escrever suas instruções, escolher modelo e provedor, enviar documentos, conversar com RAG, consultar as fontes usadas, manter histórico, alternar entre consulta/tutor/avaliação e importar ou exportar uma configuração básica.
